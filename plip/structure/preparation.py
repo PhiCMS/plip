@@ -1454,7 +1454,8 @@ class PDBComplex:
     def atom_belongs_to_ligand(atom, lig_obj):
         """test whether atom is part of a peptide or residue ligand."""
         if atom.OBAtom.GetResidue().GetChain() == lig_obj.chain:
-            if lig_obj.chain not in config.RESIDUES.keys() or atom.OBAtom.GetResidue().GetNum() in config.RESIDUES[lig_obj.chain]:
+            if lig_obj.chain not in config.RESIDUES.keys() or atom.OBAtom.GetResidue().GetNum() in config.RESIDUES[
+                lig_obj.chain]:
                 return True
         return False
 
