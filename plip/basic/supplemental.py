@@ -350,19 +350,12 @@ def canonicalize(lig, preserve_bond_order=False):
     return atomorder
 
 
-def int32_to_negative(int32):
-    """Checks if a suspicious number (e.g. ligand position) is in fact a negative number represented as a
-    32 bit integer and returns the actual number.
-    """
-    dct = {}
-    if int32 == 4294967295:  # Special case in some structures (note, this is just a workaround)
-        return -1
-    for i in range(-1000, -1):
-        dct[int(np.array(i).astype(np.uint32))] = i
-    if int32 in dct:
-        return dct[int32]
-    else:
-        return int32
+def convert_to_signed_int(res_num):
+    """Converts residue numbers (OBResidue::GetNum()) >= 2147483648 into their two's complement signed counterparts
+    (negative numbers)."""
+    if res_num < (1 << 31):
+        return res_num
+    return int(res_num - (1 << 32))
 
 
 def read_pdb(pdbfname, as_string=False):

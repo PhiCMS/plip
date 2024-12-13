@@ -13,7 +13,7 @@ from plip.basic.supplemental import centroid, tilde_expansion, tmpfile, classify
 from plip.basic.supplemental import cluster_doubles, is_lig, normalize_vector, vector, ring_is_planar
 from plip.basic.supplemental import extract_pdbid, read_pdb, create_folder_if_not_exists, canonicalize
 from plip.basic.supplemental import read, nucleotide_linkage, sort_members_by_importance
-from plip.basic.supplemental import whichchain, whichrestype, whichresnumber, euclidean3d, int32_to_negative
+from plip.basic.supplemental import whichchain, whichrestype, whichresnumber, euclidean3d, convert_to_signed_int
 from plip.structure.detection import halogen, pication, water_bridges, metal_complexation
 from plip.structure.detection import hydrophobic_interactions, pistacking, hbonds, saltbridge
 
@@ -297,7 +297,7 @@ class LigandFinder:
     def extract_ligand(self, kmer):
         """Extract the ligand by copying atoms and bonds and assign all information necessary for later steps."""
         data = namedtuple('ligand', 'mol hetid chain position water members longname type atomorder can_to_pdb')
-        members = [(res.GetName(), res.GetChain(), int32_to_negative(res.GetNum())) for res in kmer]
+        members = [(res.GetName(), res.GetChain(), convert_to_signed_int(res.GetNum())) for res in kmer]
         members = sort_members_by_importance(members)
         rname, rchain, rnum = members[0]
         logger.debug(f'finalizing extraction for ligand {rname}:{rchain}:{rnum} with {len(kmer)} elements')
@@ -346,10 +346,6 @@ class LigandFinder:
 
         # For kmers, the representative ids are chosen (first residue of kmer)
         lig.data.update({'Name': rname, 'Chain': rchain, 'ResNr': rnum})
-
-        # Check if a negative residue number is represented as a 32 bit integer
-        if rnum > 10 ** 5:
-            rnum = int32_to_negative(rnum)
 
         lig.title = ':'.join((rname, rchain, str(rnum)))
         self.mapper.ligandmaps[lig.title] = mapold
